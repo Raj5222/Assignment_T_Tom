@@ -1,13 +1,11 @@
-import { Request, Response } from "express";
+import { Errback, Request, Response } from "express";
 import { Customer } from "../entity/Customer";
 import { User } from "../entity/Users";
 import { AppPostgressSource } from "../config/data-source";
 import { sendEmail } from "../Services/mail";
 
-const userRepository = AppPostgressSource.getRepository(Customer);
-const SuperRepository = AppPostgressSource.getRepository(User);
 
-export const active = async (req: Request, res: Response) => {
+export const active = async (req: Request, res: Response, err:Errback) => {
   try {
     // Validate request parameters
     const user_id:any = req.query.user;
@@ -23,6 +21,7 @@ export const active = async (req: Request, res: Response) => {
     }
 
     // Verify super user
+    const SuperRepository = AppPostgressSource.getRepository(User);
     const superUser = await SuperRepository.findOneBy({ u_id: "Raj0001" });
     if (!superUser) {
       res.status(500).json({ error: 'Super user not found' });
@@ -33,6 +32,7 @@ export const active = async (req: Request, res: Response) => {
     }
 
     // Activate user account
+    const userRepository = AppPostgressSource.getRepository(Customer);
     const user = await userRepository.findOneBy({ u_id: user_id });
     if (!user) {
       res.status(404).json({ error: 'User not found' });
@@ -51,7 +51,6 @@ export const active = async (req: Request, res: Response) => {
 
     res.status(201).json(`${user.u_id} Account Activated`);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error(err,error);
   }
 };

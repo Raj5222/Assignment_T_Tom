@@ -35,11 +35,11 @@ export const AppPostgressSource = new DataSource({
   migrations: [MRole1696010000000, Mstaff9181002100000],
 });
 
-// export const AppMongoDBSource = new DataSource({
-//   type: "mongodb",
-//   url:"mongodb+srv://Raj0206:02062001@cluster0.eepco.mongodb.net",
-//   synchronize: false,
-//   logging: false,
-//   entities: [],
-//   migrations: [],
-// });
+export const AppMongoDBSource = new DataSource({
+  type: "mongodb",
+  url:"mongodb+srv://Raj0206:02062001@cluster0.eepco.mongodb.net",
+  synchronize: false,
+  logging: false,
+  entities: [],
+  migrations: [],
+});

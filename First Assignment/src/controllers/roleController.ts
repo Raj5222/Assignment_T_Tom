@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Errback, Request, Response } from "express";
 import { User } from "../entity/Users";
 import { Roles } from "../entity/Role";
 import { AppPostgressSource } from "../config/data-source";
@@ -6,7 +6,7 @@ import { AppPostgressSource } from "../config/data-source";
 const userRepository = AppPostgressSource.getRepository(User);
 const rolesRepository = AppPostgressSource.getRepository(Roles);
 
-export const updateRole = async (req: Request, res: Response) => {
+export const updateRole = async (req: Request, res: Response,err:Errback) => {
   try {
     // Validate request body
     const newrole = req.body.newrole;
@@ -37,7 +37,7 @@ export const updateRole = async (req: Request, res: Response) => {
     // Return success response
     res.status(201).json({Message:"New Role Inserted" ,Updated: roleUpdate});
   } catch (error) {
-    console.error(error);
+    console.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 };

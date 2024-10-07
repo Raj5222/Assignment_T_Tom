@@ -2,7 +2,7 @@ import * as express from "express";
 import userRoutes from "./routes/customerRoutes";
 import createRoutes from "./routes/createRoute"
 import activeUser from "./routes/activeAccountRoute";
-import {AppPostgressSource} from "./config/data-source";
+import {AppPostgressSource,AppMongoDBSource} from "./config/data-source";
 import "reflect-metadata";
 
 const app = express();
@@ -12,6 +12,7 @@ const PORT = process.env.Server_Port || 3000;
 app.use(express.json());
 
 // Connect to database
+// PostGres Connection
 AppPostgressSource.initialize()
   .then(() => {
     console.log("Postgres Connected.");
@@ -23,16 +24,16 @@ AppPostgressSource.initialize()
   })
   .catch((error) => console.log("Database connection error: ", error));
 
-  // AppMongoDBSource.initialize()
-  //   .then(() => {
-  //     console.log("MongoDB Connected.");
-
-  //     // Use user routes
-
-  //     // Start the server
-  //   })
-  //   .catch((error) => console.log("Database connection error: ", error));
+  // MongoDB Connection
+  AppMongoDBSource.initialize()
+    .then(() => {
+      console.log("MongoDB Connected.");
+      // Use user routes
+    })
+    .catch((error) => console.log("Database connection error: ", error));
     
+    
+    // Start Server
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
     });
