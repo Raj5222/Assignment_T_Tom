@@ -24,7 +24,7 @@ export const fetchUsers = async (req: Request, res: Response,err:Errback) => {
   let user;
   try {
 
-    if(!j_token)res.status(401).json({ message: "Not Set JWT Token." });
+    if(!j_token)res.status(401).json({ message: "Not Set JWT Token." }); //not required
     try{
       verifyToken(j_token)  //Jwt Verify
      }catch(err){
@@ -32,7 +32,7 @@ export const fetchUsers = async (req: Request, res: Response,err:Errback) => {
      }
 
     if (id) {
-      user = await userRepository.findOneOrFail({ where: { u_id: id } });
+      user = await userRepository.findOneOrFail({ where: { u_id: id } }); //performance
     } else {
       user = await userRepository.findOneOrFail({ where: { email } });
     }
@@ -49,7 +49,7 @@ export const fetchUsers = async (req: Request, res: Response,err:Errback) => {
 
 
 // Add User
-export const addUser = async (req: Request, res: Response, err:Errback) => {
+export const addUserStaff = async (req: Request, res: Response, err:Errback) => {
   const user = req.body;
 //   console.log("Password is => ",await CryptoService.encrypt(user.password).then());
   user.password = await Crypto.encrypt(user.password).then(); //Pasword ecpt
@@ -57,7 +57,8 @@ export const addUser = async (req: Request, res: Response, err:Errback) => {
   const count = await userRepository.count({
     where: { firstname: user.firstname },
   });
-  user.u_id = user.firstname.slice(0, 3) + "000" + count; //Uid Set
+  user.u_id = user.firstname.slice(0, 3)+(count).toString().padStart(4, "0"); //Uid Set
+  
   console.log(user);
   user.jwt_token = await generateToken(user.u_id)
 

@@ -22,7 +22,10 @@ export const active = async (req: Request, res: Response, err:Errback) => {
 
     // Verify super user
     const SuperRepository = AppPostgressSource.getRepository(User);
-    const superUser = await SuperRepository.findOneBy({ u_id: "Raj0001" });
+    const superUser = await SuperRepository.createQueryBuilder("user")
+      .select(["user.jwt_token", "user.firstname"])
+      .where("user.u_id = :temp", { temp: "Raj0001" })
+      .getOne();
     if (!superUser) {
       res.status(500).json({ error: 'Super user not found' });
     }

@@ -21,10 +21,15 @@ export const fetchUsers = async (req: Request, res: Response, err: Errback) => {
   }
 };
 
+//
 export const addUser = async (req: Request, res: Response, err: Errback) => {
   const user = req.body;
   const jwt:any = req.headers.Authorization
-  const super_user = await userRepository.findOneBy({jwt_token: jwt });
+  const super_user = await userRepository
+    .createQueryBuilder("user")
+    .select(["user.user_u_id", "user.firstname"])
+    .where("user.jwt_token = :jwt", { jwt })
+    .getOne();
 
   if(!super_user)res.status(500).json("Super User Not Found")
 
@@ -35,7 +40,7 @@ export const addUser = async (req: Request, res: Response, err: Errback) => {
   const count = await customerRepository.count({
     where: { firstname: user.firstname },
   });
-  user.u_id = user.firstname.slice(0, 3) + "000" + count; //Uid Set
+  user.u_id = user.firstname.slice(0, 3) + count.toString().padStart(4, "0"); //Uid Set
   console.log(user);
   user.jwt_token = await generateToken(user.u_id);
 

@@ -21,7 +21,12 @@ export const updateRole = async (req: Request, res: Response,err:Errback) => {
     }
 
     // Verify super user
-    const superUser = await userRepository.findOneBy({ u_id: "Raj0001" });
+    const superUser = await userRepository
+      .createQueryBuilder("user")
+      .select(["user.jwt_token"])
+      .where("user.u_id = :temp", { temp:'Raj0001' })
+      .getOne();
+
     if (!superUser) {
       res.status(500).json({ error: "Super user not found" });
     }
