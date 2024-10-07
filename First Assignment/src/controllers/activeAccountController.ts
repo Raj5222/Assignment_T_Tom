@@ -51,6 +51,6 @@ export const active = async (req: Request, res: Response, err:Errback) => {
 
     res.status(201).json(`${user.u_id} Account Activated`);
   } catch (error) {
-    console.error(err,error);
+    err(error)
   }
 };

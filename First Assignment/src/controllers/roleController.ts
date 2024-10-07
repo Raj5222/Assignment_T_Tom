@@ -37,7 +37,6 @@ export const updateRole = async (req: Request, res: Response,err:Errback) => {
     // Return success response
     res.status(201).json({Message:"New Role Inserted" ,Updated: roleUpdate});
   } catch (error) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    err(error);
   }
 };

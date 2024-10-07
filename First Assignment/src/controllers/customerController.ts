@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Errback, Request, Response } from "express";
 import { Customer } from "../entity/Customer";
 import { User } from "../entity/Users";
 import { AppPostgressSource } from "../config/data-source";
@@ -9,7 +9,7 @@ import { generateToken } from "../Services/jwt";
 const customerRepository = AppPostgressSource.getRepository(Customer);
 const userRepository = AppPostgressSource.getRepository(User);
 
-export const fetchUsers = async (req: Request, res: Response) => {
+export const fetchUsers = async (req: Request, res: Response, err: Errback) => {
   try {
     console.log(req.headers);
     const users = await userRepository.find({
@@ -17,11 +17,11 @@ export const fetchUsers = async (req: Request, res: Response) => {
     });
     res.json(users);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    err(error)
   }
 };
 
-export const addUser = async (req: Request, res: Response) => {
+export const addUser = async (req: Request, res: Response, err: Errback) => {
   const user = req.body;
   const jwt:any = req.headers.Authorization
   const super_user = await userRepository.findOneBy({jwt_token: jwt });
@@ -47,7 +47,8 @@ export const addUser = async (req: Request, res: Response) => {
       .into(Customer)
       .values(user)
       .execute();
-    res.status(201).json("New User Created");
+
+    res.status(201).json({message:"New User Created",newUser});
 
     await sendEmail(
       "raj.sathavara122@gmail.com",
@@ -57,6 +58,6 @@ export const addUser = async (req: Request, res: Response) => {
     );
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    err(error)
   }
 };

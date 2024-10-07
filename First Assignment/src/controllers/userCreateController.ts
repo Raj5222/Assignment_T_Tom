@@ -8,7 +8,7 @@ import { sendEmail } from "../Services/mail";
 const userRepository = AppPostgressSource.getRepository(User);
 
 // Login User
-export const fetchUsers = async (req: Request, res: Response,looperror:Errback) => {
+export const fetchUsers = async (req: Request, res: Response,err:Errback) => {
   const j_token = await req.headers.authorization;
   console.log("<= End")
     let body: any = await Crypto.decryptJson(req.body.data);
@@ -43,13 +43,13 @@ export const fetchUsers = async (req: Request, res: Response,looperror:Errback) 
     }
     res.status(200).json({ message: `Welcome ${user.firstname}`  });
   } catch (error) {
-    looperror(error);
+    err(error);
   }
 };
 
 
 // Add User
-export const addUser = async (req: Request, res: Response) => {
+export const addUser = async (req: Request, res: Response, err:Errback) => {
   const user = req.body;
 //   console.log("Password is => ",await CryptoService.encrypt(user.password).then());
   user.password = await Crypto.encrypt(user.password).then(); //Pasword ecpt
@@ -77,11 +77,11 @@ export const addUser = async (req: Request, res: Response) => {
         "http://localhost:3000/api/active "
       ); 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    err(error)
   }
 };
 
-export const encry = async (req: Request, res: Response) => {
+export const encry = async (req: Request, res: Response,err:Errback) => {
   // Temperary Encrypt and Decrypt
   const user = req.body;
   console.log("Authorization => ",req.headers.Authorization)
@@ -96,8 +96,6 @@ export const encry = async (req: Request, res: Response) => {
       res.status(201).json(data);
     }
   } catch (error) {
-    if (!res.headersSent) {
-            res.status(500).json({ error: "An unexpected error occurred." });
-          }
+    err(error)
   }
 };
