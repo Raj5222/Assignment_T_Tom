@@ -1,18 +1,19 @@
 import {
   Entity,
   Column,
-  getRepository,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
-  BeforeInsert,
+  OneToMany
 } from "typeorm";
 import { Roles } from "./Role";
+import { User_Tr } from "./Users_Tr";
 
 @Entity("user")
 export class User {
   @PrimaryGeneratedColumn()
+  @OneToMany(() => User_Tr, (user) => user.user_u_id)
   user_u_id: number;
 
   @Column()
@@ -30,13 +31,11 @@ export class User {
   email: string;
 
   @Column({
-    default:false
+    default: false,
   })
   status: boolean;
 
-  @ManyToOne(() => Roles, (role) => role.role_u_id, {
-    cascade: ["insert", "update", "remove"],
-  })
+  @ManyToOne(() => Roles, (role) => role.role_u_id)
   @JoinColumn({ name: "role" })
   @Column({ default: 3 })
   role: number;
@@ -54,16 +53,6 @@ export class User {
   @Column()
   jwt_token: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: "timestamp with time zone" })
   createdAt: Date;
-
-  @BeforeInsert()
-  async generateUId() {
-    const userRepository = getRepository(User);
-    const count = await userRepository.count({
-      where: { firstname: this.firstname },
-    });
-    const index = count + 1;
-    this.u_id = `${this.firstname}${index.toString().padStart(3, "0")}`;
-  }
 }

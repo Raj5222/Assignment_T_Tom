@@ -1,10 +1,10 @@
 import { Errback, Request, Response } from "express";
 import { Customer } from "../entity/Customer";
 import { User } from "../entity/Users";
-import { AppPostgressSource } from "../config/data-source";
 import { sendEmail } from "../Services/mail";
 import Crypto from "../Services/crypto";
 import { generateToken } from "../Services/jwt";
+import { AppPostgressSource } from "../config/data-source1";
 
 const customerRepository = AppPostgressSource.getRepository(Customer);
 const userRepository = AppPostgressSource.getRepository(User);

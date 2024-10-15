@@ -1,9 +1,8 @@
 import { Errback, Request, Response } from "express";
 import { Customer } from "../entity/Customer";
 import { User } from "../entity/Users";
-import { AppPostgressSource } from "../config/data-source";
 import { sendEmail } from "../Services/mail";
-
+import { AppPostgressSource } from "../config/data-source1";
 
 export const active = async (req: Request, res: Response, err:Errback) => {
   try {
@@ -35,24 +34,29 @@ export const active = async (req: Request, res: Response, err:Errback) => {
     }
 
     // Activate user account
-    const userRepository = AppPostgressSource.getRepository(Customer);
+    const userRepository = AppPostgressSource.getRepository(User);
     const user = await userRepository.findOneBy({ u_id: user_id });
     if (!user) {
       res.status(404).json({ error: 'User not found' });
     }
 
-    user.status = true; // Update user status directly
-    await userRepository.save(user);
+    if(user.status !== true){
+      user.status = true; // Update user status directly
+      await userRepository.save(user);
+  
+      // Send activation email
+      await sendEmail(
+        "raj.sathavara122@gmail.com",
+        `${user.u_id} Account Activated.`,
+        superUser.firstname,
+        `New User ${user.firstname} ,U_ID is ${user.u_id} Is Now Activated`
+      );
+  
+      res.status(200).json(`${user.u_id} Account Activated`);
+    }else{
+      res.status(404).json(`${user.u_id} is Already Account Activated`);
+    }
 
-    // Send activation email
-    await sendEmail(
-      "raj.sathavara122@gmail.com",
-      `${user.u_id} Account Activated.`,
-      superUser.firstname,
-      `New User ${user.firstname} ,U_ID is ${user.u_id} Is Now Activated`
-    );
-
-    res.status(201).json(`${user.u_id} Account Activated`);
   } catch (error) {
     err(error)
   }

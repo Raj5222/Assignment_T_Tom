@@ -1,10 +1,14 @@
 import { MailerSend, EmailParams, Recipient, Sender } from "mailersend";
 import * as Handlebars from "handlebars";
 import * as fs from "fs";
+import * as dotenv from "dotenv";
+
+// Load environment variables
+dotenv.config();
 
 const emailConfig = {
-  apiKey: String(process.env.mailkey),
-  senderEmail: String(process.env.email),
+  apiKey: process.env.mailkey, // No need for String() conversion
+  senderEmail: process.env.email,
 };
 
 // Load email template
@@ -22,13 +26,12 @@ export async function sendEmail(
   link?: string
 ): Promise<boolean> {
   try {
-    // Input validation
     if (!recipientEmail || !subject || !super_admin || !message) {
       throw new Error("Invalid input");
     }
 
     const mailerSend = new MailerSend({
-      apiKey: emailConfig.apiKey,
+      apiKey: emailConfig.apiKey, // Ensure this is not undefined
     });
 
     const recipient = new Recipient(recipientEmail);
@@ -52,7 +55,10 @@ export async function sendEmail(
     console.log("Email sent successfully!");
     return true;
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error(
+      "Error sending email:",
+      error.response?.data || error.message
+    );
     return false;
   }
 }

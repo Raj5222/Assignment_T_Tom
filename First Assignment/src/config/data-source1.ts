@@ -5,10 +5,12 @@ import { Roles } from "../entity/Role";
 import { Customer } from "../entity/Customer";
 import { Mstaff9181002100000 } from "../migration/Muser";
 import { MRole1696010000000 } from "../migration/Mrole";
-import * as dotenv from "dotenv";
+import { config } from "dotenv";
+import { User_Tr } from "../entity/Users_Tr";
+import { UserTrts1728897062280 } from "../migration/1728897062280-User_Tr";
+import { User_Trts1728906750764 } from "../migration/1728906750764-User__Tr.ts";
 
-// Load environment variables from .env file
-dotenv.config();
+config()
 
 // Ensure that we have the necessary environment variables
 if (
@@ -31,15 +33,10 @@ export const AppPostgressSource = new DataSource({
   database: process.env.database,
   synchronize: true,
   logging: true,
-  entities: [Roles, Customer, User],
-  migrations: [MRole1696010000000, Mstaff9181002100000],
-});
-
-export const AppMongoDBSource = new DataSource({
-  type: "mongodb",
-  url:"mongodb+srv://Raj0206:02062001@cluster0.eepco.mongodb.net",
-  synchronize: false,
-  logging: false,
-  entities: [],
-  migrations: [],
+  entities: [Roles, User, User_Tr, Customer],
+  migrations: [
+    MRole1696010000000,
+    Mstaff9181002100000,
+    UserTrts1728897062280,
+    User_Trts1728906750764],
 });

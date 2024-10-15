@@ -1,7 +1,9 @@
 import { Errback, Request, Response } from "express";
 import { User } from "../entity/Users";
 import { Roles } from "../entity/Role";
-import { AppPostgressSource } from "../config/data-source";
+import { AppPostgressSource } from "../config/data-source1";
+import { verifyToken } from "../Services/jwt";
+import { error } from "console";
 
 const userRepository = AppPostgressSource.getRepository(User);
 const rolesRepository = AppPostgressSource.getRepository(Roles);
@@ -20,27 +22,43 @@ export const updateRole = async (req: Request, res: Response,err:Errback) => {
       res.status(401).json({ error: "JWT token is required" });
     }
 
-    // Verify super user
-    const superUser = await userRepository
-      .createQueryBuilder("user")
-      .select(["user.jwt_token"])
-      .where("user.u_id = :temp", { temp:'Raj0001' })
-      .getOne();
+    const decoded = verifyToken(jwtToken);
 
-    if (!superUser) {
-      res.status(500).json({ error: "Super user not found" });
+    if (!decoded.exp)
+      res.status(500).json({ error: "Invalid Or Expired JWT token" });
+
+    if (decoded.exp) {
+      try {
+        // Verify super user
+        const superUser = await userRepository
+          .createQueryBuilder("user")
+          .select(["user.jwt_token"])
+          .where("user.jwt_token = :jwt AND user.role IN :roles", {
+            roles: [1,2],
+            jwt: jwtToken,
+          })
+          .getOne();
+
+          console.log(`Super User =>`,superUser)
+
+        if (!superUser) {
+          res.status(500).json({
+            error:
+              "You Cannot Add New Role. Please Contact With Admin Or Super Admin",
+          });
+        }
+        const dataRole = rolesRepository.create({ role: newrole });
+        const roleUpdate = await rolesRepository.save(dataRole);
+        res
+          .status(201)
+          .json({ Message: "New Role Inserted", Updated: roleUpdate });
+      } catch (err) {
+        res
+          .status(404)
+          .json({ error: `${newrole} is Already Available in Roles.`});
+      }
     }
 
-    if (superUser.jwt_token !== jwtToken) {
-      res.status(401).json({ error: "Invalid JWT token" });
-    }
-
-    // Create new role
-    const dataRole = rolesRepository.create({ role: newrole });
-    const roleUpdate = await rolesRepository.save(dataRole);
-
-    // Return success response
-    res.status(201).json({Message:"New Role Inserted" ,Updated: roleUpdate});
   } catch (error) {
     err(error);
   }

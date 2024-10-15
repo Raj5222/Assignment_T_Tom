@@ -1,8 +1,10 @@
 import * as crypto from "crypto";
-
-const algorithm = "aes-256-cbc";
-const key = process.env.SECRET_KEY!.toString();
-const iv = process.env.IV!.toString();
+import { config } from "dotenv";
+config()
+if (!process.env.SECRET_KEY || !process.env.IV)console.log("Crypto Data Env MIssing")
+  const algorithm = "aes-256-cbc";
+const key = process.env.SECRET_KEY;
+const iv = process.env.IV;
 
 class Crypto {
   public static async encrypt(plainText: string): Promise<string> {
