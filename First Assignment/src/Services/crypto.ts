@@ -1,48 +1,60 @@
-import * as crypto from "crypto";
+import * as crypto from "crypto-js";
 import { config } from "dotenv";
-config()
-if (!process.env.SECRET_KEY || !process.env.IV)console.log("Crypto Data Env MIssing")
-  const algorithm = "aes-256-cbc";
-const key = process.env.SECRET_KEY;
-const iv = process.env.IV;
+
+config();
+
+if (!process.env.SECRET_KEY || !process.env.IV) {
+  console.error("Error: Missing environment variables for encryption.");
+  process.exit(1);
+}
+
+const key = crypto.enc.Hex.parse(process.env.SECRET_KEY);
+const iv = crypto.enc.Hex.parse(process.env.IV);
 
 class Crypto {
   public static async encrypt(plainText: string): Promise<string> {
+    if (typeof plainText !== "string") {
+      throw new TypeError("Plain text must be a string.");
+    }
+
     try {
-      plainText = plainText.toString();
-      const cipher = crypto.createCipheriv(algorithm, key, iv);
-      const enc = cipher.update(plainText, "utf8", "hex") + cipher.final("hex");
-      console.log(enc)
-      return enc
+      const encrypted = crypto.AES.encrypt(plainText, key, { iv }).toString();
+      return encrypted;
     } catch (error) {
-      throw new Error(`Encryption failed: ${error}`);
+      throw new Error(`Encryption failed: ${error.message}`);
     }
   }
 
   public static async decrypt(encrypted: string): Promise<string> {
+    if (typeof encrypted !== "string") {
+      throw new TypeError("Encrypted text must be a string.");
+    }
+
     try {
-      const decipher = crypto.createDecipheriv(algorithm, key, iv);
-      const dec = (
-        decipher.update(encrypted, "hex", "utf8") +
-        decipher.final("utf8").toString()
+      const decrypted = crypto.AES.decrypt(encrypted, key, { iv }).toString(
+        crypto.enc.Utf8
       );
-      console.log(dec)
-      return dec;
+      if (!decrypted) {
+        throw new Error("Decryption failed: Invalid encrypted data.");
+      }
+      return decrypted;
     } catch (error) {
-      console.error("Decryption error:", error);
       throw new Error(`Decryption failed: ${error.message}`);
     }
   }
 
   public static async decryptJson(encryptedJson: string): Promise<object> {
-    const decryptedJson = await Crypto.decrypt(encryptedJson);
-    console.log(decryptedJson)
+    const decryptedJson = await this.decrypt(encryptedJson);
     return JSON.parse(decryptedJson);
   }
 
   public static async encryptJson(jsonData: object): Promise<string> {
+    if (typeof jsonData !== "object") {
+      throw new TypeError("JSON data must be an object.");
+    }
+
     const jsonStr = JSON.stringify(jsonData);
-    return Crypto.encrypt(jsonStr);
+    return this.encrypt(jsonStr);
   }
 }
 

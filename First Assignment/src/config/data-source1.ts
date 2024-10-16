@@ -8,7 +8,6 @@ import { MRole1696010000000 } from "../migration/Mrole";
 import { config } from "dotenv";
 import { User_Tr } from "../entity/Users_Tr";
 import { UserTrts1728897062280 } from "../migration/1728897062280-User_Tr";
-import { User_Trts1728906750764 } from "../migration/1728906750764-User__Tr.ts";
 
 config()
 
@@ -37,6 +36,5 @@ export const AppPostgressSource = new DataSource({
   migrations: [
     MRole1696010000000,
     Mstaff9181002100000,
-    UserTrts1728897062280,
-    User_Trts1728906750764],
+    UserTrts1728897062280],
 });

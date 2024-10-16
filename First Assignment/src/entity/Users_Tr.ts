@@ -17,9 +17,6 @@ export class User_Tr {
   @Column()
   name: string;
 
-  @Column()
-  lastname: string;
-
   @Column({ type: "jsonb" })
   location: string;
 
