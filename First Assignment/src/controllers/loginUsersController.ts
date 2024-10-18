@@ -3,6 +3,7 @@ import { User } from "../entity/Users";
 import Crypto from "../Services/crypto";
 import { AppPostgressSource } from "../config/data-source1";
 import { generateToken } from "../Services/jwt";
+import Chat from "../controllers/Socket_FCM";
 
 const userRepository = AppPostgressSource.getRepository(User);
 
@@ -54,7 +55,7 @@ export const loginUsers = async (req: Request, res: Response, err: Errback) => {
       if (!isValidPassword) {
         res.status(401).json({ error: "Invalid credential." });
       }
-      
+      Chat() // Chat Socket Server On....
       res.status(200).json({
         message: `Welcome ${user.firstname}`,
         token: generateToken(user.u_id),

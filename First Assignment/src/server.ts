@@ -6,11 +6,10 @@ import "reflect-metadata";
 import { AppPostgressSource } from "./config/data-source1";
 import { AppMongoDBSource } from "./config/data-source2";
 import * as cors from "cors";
-import socketRoute from "./routes/SocketRoute";
 
 const app = express();
 app.use((request, response, next) => {
-  console.log("Request URL => ", request.url);
+  console.log("Request URL => ",request.headers.origin," <=> ", request.url);
   next();
 });
 
@@ -22,13 +21,6 @@ app.use( cors({
 // Middleware to parse JSON
 app.use(express.json());
 
-// Logging middleware
-app.use((req, res, next) => {
-  console.log("Request URL:", req.url);
-  next();
-});
-
-
 
 
 // Connect to databases
@@ -39,7 +31,6 @@ async function connectDatabases() {
     app.use("/api", userRoutes);
     app.use("/api", createRoutes);
     app.use("/api", activeUser);
-    app.use("/api", socketRoute);
 
     await AppMongoDBSource.initialize();
     console.log("MongoDB connected.");

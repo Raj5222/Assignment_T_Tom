@@ -9,15 +9,18 @@ function ChatRoom() {
   try {
     const server = createServer();
     const io = new Server(server, {
-      path: "/api/Chat",
+      path: "/api/Chat/",
       cors: {
         origin: "*",
       },
       transports: ["websocket"],
     });
+    const port = process.env.Socket_Port;
+    if (!port) console.warn("Port Not Avalable In Socket File.");
 
-    server.listen(3004, () => {
-      console.log("Socket.IO server listening on port 3004");
+    server.listen(port, () => {
+      //Socket Port
+      console.log(`Socket.IO Server Start On Port ${port}`);
     });
 
     const users = {};
@@ -63,7 +66,6 @@ function ChatRoom() {
         console.error("Socket connection error :", err);
       });
     });
-
 
     instance = { io, server };
   } catch (err) {
