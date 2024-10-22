@@ -55,7 +55,7 @@ export const loginUsers = async (req: Request, res: Response, err: Errback) => {
       if (!isValidPassword) {
         res.status(401).json({ error: "Invalid credential." });
       }
-      Chat() // Chat Socket Server On....
+      Chat() ; // Chat Socket Server On....
       res.status(200).json({
         message: `Welcome ${user.firstname}`,
         token: generateToken(user.u_id),

@@ -6,6 +6,7 @@ import "reflect-metadata";
 import { AppPostgressSource } from "./config/data-source1";
 import { AppMongoDBSource } from "./config/data-source2";
 import * as cors from "cors";
+// import fcmRouter from "./routes/fcmRoute";
 
 const app = express();
 app.use((request, response, next) => {
@@ -31,6 +32,7 @@ async function connectDatabases() {
     app.use("/api", userRoutes);
     app.use("/api", createRoutes);
     app.use("/api", activeUser);
+    // app.use("/api", fcmRouter);
 
     await AppMongoDBSource.initialize();
     console.log("MongoDB connected.");
