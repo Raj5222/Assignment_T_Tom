@@ -9,7 +9,7 @@ import { config } from "dotenv";
 import { User_Tr } from "../entity/Users_Tr";
 import { UserTrts1728897062280 } from "../migration/1728897062280-User_Tr";
 
-config()
+config();
 
 // Ensure that we have the necessary environment variables
 if (
@@ -24,7 +24,8 @@ if (
 }
 
 export const AppPostgressSource = new DataSource({
-  type: "postgres",
+  type: process.env.type as any,
+  // url : process.env.pgConnectString as string, //Vercel DB
   host: process.env.host,
   port: parseInt(process.env.port),
   username: process.env.user,
@@ -33,8 +34,8 @@ export const AppPostgressSource = new DataSource({
   synchronize: true,
   logging: true,
   entities: [Roles, User, User_Tr, Customer],
-  migrations: [
-    MRole1696010000000,
-    Mstaff9181002100000,
-    UserTrts1728897062280],
+  migrations: [MRole1696010000000, Mstaff9181002100000, UserTrts1728897062280],
 });
+
+// Migration Run Command
+// typeorm migration:run --dataSource "D:\Intern\Assignments\First Assignment\build\config\data-source1.js"

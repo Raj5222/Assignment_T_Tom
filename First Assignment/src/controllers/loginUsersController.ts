@@ -4,11 +4,12 @@ import Crypto from "../Services/crypto";
 import { AppPostgressSource } from "../config/data-source1";
 import { generateToken } from "../Services/jwt";
 import Chat from "../controllers/Socket_FCM";
+import { error } from "console";
 
 const userRepository = AppPostgressSource.getRepository(User);
 
 // Login User
-export const loginUsers = async (req: Request, res: Response, err: Errback) => {
+export const loginUsers = async (req: Request, res: Response, err?: Errback) => {
   try {
     console.log("<= End");
     let body: any = await Crypto.decryptJson(req.body.data);
@@ -44,22 +45,23 @@ export const loginUsers = async (req: Request, res: Response, err: Errback) => {
             .where("user.email = :email", { email: email })
             .getOne();
         } catch {
-          res.status(401).json({ error: "Email Not Found." });
+          res.status(401).json({ error: "User Not Found." });
         }
       }
-      if (!user) res.status(401).json({ error: "User Not Found." });
+      if (!user) res.status(401).json({ error: "Email Not Found." });
       console.log("Given Password => ", password);
       const isValidPassword =
         (await Crypto.encrypt(password)) === user.password ? true : false;
 
       if (!isValidPassword) {
-        res.status(401).json({ error: "Invalid credential." });
+        res.status(401).json({ error: "Invalid Password." });
       }
       Chat() ; // Chat Socket Server On....
       res.status(200).json({
         message: `Welcome ${user.firstname}`,
         token: generateToken(user.u_id),
-        username: user.firstname
+        username: user.firstname,
+        uid : user.u_id
       });
     } catch (error) {
       err(error);
