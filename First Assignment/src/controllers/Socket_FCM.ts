@@ -15,7 +15,7 @@ function ChatRoom() {
     const server = createServer();
     const io = new Server(server, {
       maxHttpBufferSize: 100 * 1024 * 1024, // 100 MB
-      path: "/api/Chat",
+      // path: "/api/Chat",
       cors: {
         origin: "*",
       },
@@ -32,8 +32,8 @@ function ChatRoom() {
     let roomAdmins = new Map(); // Map to store admin of each room
 
     io.on("connection", (socket) => {
-      console.log("Socket is connected.");
-
+      console.log("Socket is connected.",socket.id);
+  
       // join a chat
       socket.on("joinRoom", async ({ username, room, FCM_Token, uid }) => {
         socket.join(room);
@@ -43,7 +43,7 @@ function ChatRoom() {
           io.sockets.adapter.rooms.get(room) || []
         );
         const usersInRoom = roomSockets.map((socketId) => {
-          return [users.get(socketId).username, socketId];
+          return {name:users.get(socketId).username, sid:socketId};
         });
 
         console.log(`${username} Joined Room : ${room}`);
@@ -54,7 +54,10 @@ function ChatRoom() {
           socket.emit("chat", {
             message: `You are now the admin of this room`,
             system: true,
-            admin: [username, uid],
+            admin: {
+              name: username, 
+              sid: socket.id
+            },
             users: usersInRoom,
           });
         }
@@ -62,20 +65,20 @@ function ChatRoom() {
         socket.emit("chat", {
           message: `You joined the room`,
           system: true,
-          admin: [
-            users.get(roomAdmins.get(room)).username,
-            users.get(roomAdmins.get(room)).uid,
-          ],
+          admin: {
+            name: users.get(roomAdmins.get(room)).username,
+            sid : roomAdmins.get(room),
+          },
           users: usersInRoom,
         });
 
         socket.to(room).emit("chat", {
           message: `${username} joined the room`,
           system: true,
-          admin: [
-            users.get(roomAdmins.get(room)).username,
-            users.get(roomAdmins.get(room)).uid,
-          ],
+          admin: {
+           name: users.get(roomAdmins.get(room)).username,
+           sid: roomAdmins.get(room),
+          },
           users: usersInRoom,
         });
 
@@ -103,6 +106,11 @@ function ChatRoom() {
           const targetUser = users.get(targetSocketId);
 
           if (targetUser && targetUser.room === room) {
+            socket.to(targetSocketId).emit("kick", {
+              kick: `Admin(${
+                users.get(roomAdmins.get(room)).username
+              }): kicked you out of room ${room}.`,
+            });
             // Mark the user as kicked
             targetUser.kicked = true;
 
@@ -141,7 +149,9 @@ function ChatRoom() {
               message: `${user.username} has been kicked out of the room.`,
               system: true,
               users: Array.from(io.sockets.adapter.rooms.get(user.room) || []).map(
-                (socketId) => [users.get(socketId).username, socketId]
+                (socketId) => {
+                 return {name:users.get(socketId).username ,sid:socketId}
+                }
               ),
             });
             
@@ -152,7 +162,7 @@ function ChatRoom() {
             io.sockets.adapter.rooms.get(user.room) || []
           );
           const usersInRoom = roomSockets.map((socketId) => {
-            return [users.get(socketId).username, socketId];
+            return {name:users.get(socketId).username, sid:socketId};
           });
 
           console.log(`${user.username} Left room: ${user.room}`);
@@ -188,7 +198,7 @@ function ChatRoom() {
                 const newAdmin = users.get(newAdminSocketId);
                 socket.to(user.room).emit("chat", {
                   message: `${newAdmin.username} is now the new admin of this Room`,
-                  admin: [newAdmin.username, newAdmin.uid],
+                  admin: {name:newAdmin.username, sid:newAdminSocketId},
                   users: usersInRoom,
                   system: true,
                 });
