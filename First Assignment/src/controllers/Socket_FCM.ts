@@ -32,7 +32,7 @@ function ChatRoom() {
     let roomAdmins = new Map(); // Map to store admin of each room
 
     io.on("connection", (socket) => {
-      console.log("Socket is connected.",socket.id);
+      console.log("Socket is connected. => ID :",socket.id);
   
       // join a chat
       socket.on("joinRoom", async ({ username, room, FCM_Token, uid }) => {
