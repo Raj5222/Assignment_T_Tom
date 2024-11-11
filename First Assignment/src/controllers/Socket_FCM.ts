@@ -47,7 +47,7 @@ function ChatRoom() {
 
     })
 
-    io.on("connection", (socket) => {
+    io.of("/chat").on("connection", (socket) => { //Chat socket For Chat
       console.log("Socket is connected. => ID :",socket.id);
       // join a chat
       socket.on("joinRoom", async ({ username, room, FCM_Token, uid }) => {
@@ -55,7 +55,7 @@ function ChatRoom() {
         users.set(socket.id, { username, room, FCM_Token, uid });
 
         const roomSockets = Array.from(
-          io.sockets.adapter.rooms.get(room) || []
+          io.of("/chat").adapter.rooms.get(room) || []
         );
         const usersInRoom = roomSockets.map((socketId) => {
           return {name:users.get(socketId).username, sid:socketId};
@@ -99,10 +99,10 @@ function ChatRoom() {
 
         if (FCM_Token) {
           await subscribeToTopic(FCM_Token, room);
-          await sendMessage(username, room);
         } else {
           console.log("FCM Tokens Not Available");
         }
+        await sendMessage(username, room);
       });
 
       // Group message event
@@ -110,7 +110,7 @@ function ChatRoom() {
         const { room } = users.get(socket.id);
         if (room) {
           console.log("New Message in room:", room, Message_And_Attachatment);
-          io.to(room).emit("chat", Message_And_Attachatment);
+          socket.to(room).emit("chat", Message_And_Attachatment);
           //All Message Transfer From Here to Other Users.
         }
       });
@@ -131,7 +131,7 @@ function ChatRoom() {
             targetUser.kicked = true;
 
             // Disconnect the target user from the room
-            io.sockets.sockets.get(targetSocketId).disconnect(true);
+            io.of("/chat").sockets.get(targetSocketId).disconnect(true);
 
             console.log(`${targetUser.username} was kicked from room: ${room}`);
           } else {
@@ -164,18 +164,20 @@ function ChatRoom() {
             socket.to(user.room).emit("chat", {
               message: `${user.username} has been kicked out of the room.`,
               system: true,
-              users: Array.from(io.sockets.adapter.rooms.get(user.room) || []).map(
+              users: Array.from(io.of("/chat").adapter.rooms.get(user.room) || []).map(
                 (socketId) => {
                  return {name:users.get(socketId).username ,sid:socketId}
                 }
               ),
             });
+
+            await unsubscribeToTopic(user.FCM_Token, user.room);
             
             return;
           }
 
           const roomSockets = Array.from(
-            io.sockets.adapter.rooms.get(user.room) || []
+            io.of("/chat").adapter.rooms.get(user.room) || []
           );
           const usersInRoom = roomSockets.map((socketId) => {
             return {name:users.get(socketId).username, sid:socketId};
@@ -205,7 +207,7 @@ function ChatRoom() {
               );
 
               const roomSockets = Array.from(
-                io.sockets.adapter.rooms.get(user.room) || []
+                io.of("/chat").adapter.rooms.get(user.room) || []
               );
               const newAdminSocketId = roomSockets[0]; // Choose the first user in the room
 

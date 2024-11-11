@@ -11,6 +11,8 @@ admin.initializeApp({
   databaseURL: process.env.databaseURL,
 });
 
+
+
 export async function subscribeToTopic(token, topic) {
   try {
     if (!token) {
