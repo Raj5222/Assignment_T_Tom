@@ -37,7 +37,7 @@ export async function sendMessage(username, topic) {
     notification: {
       title: "New User Joined In ChatRoom",
       body: `New User: ${username} Joined in Room: ${topic}`,
-      icon: "https://raw.githubusercontent.com/Raj5222/Project-Management-System/main/Temp/Icon/Raj-logo.png",
+      // icon: "https://raw.githubusercontent.com/Raj5222/Project-Management-System/main/Temp/Icon/Raj-logo.png",
     },
     topic: topic,
   };

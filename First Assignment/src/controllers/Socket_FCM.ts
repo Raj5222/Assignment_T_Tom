@@ -30,10 +30,25 @@ function ChatRoom() {
 
     const users = new Map(); // Map to store user data
     let roomAdmins = new Map(); // Map to store admin of each room
+    const roomsNamespace = io.of("/rooms");
+    roomsNamespace.on("connection",(socket)=>{
+      socket.on("roomlist", async() => {
+        console.log("Room Lsit Called.")
+        const rooms = Array.from(roomAdmins.keys());
+        socket.emit("roomlist",{ rooms: rooms[0] ? rooms : false, system: true });
+        console.log("Room list =>",rooms)
+      });
+
+      socket.on("disconnect", () => {
+        console.log(
+          `User disconnected from /rooms namespace, socket.id: ${socket.id}`
+        );
+      });
+
+    })
 
     io.on("connection", (socket) => {
       console.log("Socket is connected. => ID :",socket.id);
-  
       // join a chat
       socket.on("joinRoom", async ({ username, room, FCM_Token, uid }) => {
         socket.join(room);
@@ -91,11 +106,12 @@ function ChatRoom() {
       });
 
       // Group message event
-      socket.on("Group", (payload) => {
+      socket.on("Group", (Message_And_Attachatment) => {
         const { room } = users.get(socket.id);
         if (room) {
-          console.log("New Message in room:", room, payload);
-          io.to(room).emit("chat", payload);
+          console.log("New Message in room:", room, Message_And_Attachatment);
+          io.to(room).emit("chat", Message_And_Attachatment);
+          //All Message Transfer From Here to Other Users.
         }
       });
 
