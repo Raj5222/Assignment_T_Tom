@@ -9,7 +9,7 @@ const userRepository = AppPostgressSource.getRepository(Complain);
 
 //Cron Job
 schedule("*/10 * * * * *", async function () {
-        
+        //Cron Job Run Every 10 Sec..
     const Cronsresponse = await userRepository
       .createQueryBuilder("complain_table")
       .select(["complain_id", "trigger_time"])
