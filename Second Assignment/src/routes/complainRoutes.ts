@@ -1,5 +1,7 @@
 import { Router } from "express";
-import { complainCreate, complainGet, complainUpdate } from "../controllers/complainFormController";
+import { complainCreate} from "../controllers/complain_Create_Controller";
+import { complainGet } from "../controllers/complain_Get_Controller";
+import { complainUpdate } from "../controllers/Complain_update_Controller";
 
 export const complains = Router();
 

@@ -4,6 +4,7 @@ import { User } from "../entity/Users";
 import { sendEmail } from "../Services/mail";
 import { AppPostgressSource } from "../config/data-source1";
 
+
 export const active = async (req: Request, res: Response, err:Errback) => {
   try {
     // Validate request parameters
