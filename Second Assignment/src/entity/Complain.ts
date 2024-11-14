@@ -6,6 +6,8 @@ import {
   ManyToOne,
   JoinColumn,
 } from "typeorm";
+import { User } from "./Users";
+import { Complain_form } from "./complain_form";
 
 
 @Entity("complain_table")
@@ -16,8 +18,15 @@ export class Complain {
   @Column()
   complain_title: string;
 
-  @Column()
-  complain_status: string;
+  @ManyToOne(() => Complain_form, (form) => form.form_id)
+  @JoinColumn({ name: "form_id" })
+  @Column({default:1})
+  form_id: number;
+
+  @Column({
+    default: 1,
+  })
+  complain_status: number;
 
   //   @Column()
   //   description: string
@@ -28,41 +37,14 @@ export class Complain {
   @Column({ type: "jsonb" })
   complain_data: string;
 
-  @Column({default:null})
-  trigger_time: number;
+  @Column({ default: null })
+  trigger_time: string;
 
+  @ManyToOne(() => User, (user) => user.u_id)
+  @JoinColumn({ name: "complain_user_id" })
   @Column()
-  complain_user_id: string;
+  complain_user_id: number;
 
   @CreateDateColumn({ type: "timestamp with time zone" })
-  created_at: Date;
-}
-
-
-
-@Entity("complain_log")
-export class ComplainLog {
-  @PrimaryGeneratedColumn()
-  log_id: number;
-
-  @Column()
-  complain_id: number;
-
-  @Column()
-  complain_user_id: string;
-
-  @Column()
-  complain_title: string;
-
-  @Column({ type: "jsonb" })
-  complain_data: string;
-
-  @Column()
-  complain_status: string;
-
-  @Column({ default: null })
-  trigger_time: number;
-
-  @CreateDateColumn()
   created_at: Date;
 }

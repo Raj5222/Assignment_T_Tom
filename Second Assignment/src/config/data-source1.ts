@@ -8,8 +8,10 @@ import { MRole1696010000000 } from "../migration/Mrole";
 import { config } from "dotenv";
 import { User_Tr } from "../entity/Users_Tr";
 import { UserTrts1728897062280 } from "../migration/1728897062280-User_Tr";
-import { Complain, ComplainLog } from "../entity/Complain";
+import { Complain } from "../entity/Complain";
 import { Complain_trigger1728887062280 } from "../migration/Complain_Trigger";
+import { Complain_form } from "../entity/complain_form";
+import { ComplainLog } from "../entity/Complain_log";
 
 config();
 
@@ -38,7 +40,14 @@ export const AppPostgressSource = new DataSource({
 
   synchronize: true,
   logging: true,
-  entities: [Roles, User, User_Tr, Customer, Complain, ComplainLog],
+  entities: [
+    Roles,
+    User,
+    User_Tr,
+    Customer,
+    Complain,
+    ComplainLog,
+    Complain_form],
   migrations: [
     MRole1696010000000,
     Mstaff9181002100000,
