@@ -69,31 +69,36 @@ export const complainGet = async (
             "trigger_time",
             "created_at",
           ])
-          .where("complain_user_id = :id", { id: complain.user })
+          .where(
+            'complain_data::jsonb @> \'[{"firstname": :firstname}]\'',
+            { firstname: complain.search }
+          )
           .getRawMany();
-          const matchdata = []
-          const x = await complaindata.map((data,c_idx)=>{
 
-            for(const colums of Object.keys(data)) {
+          // const matchdata = []
+          // const x = await complaindata.map((data,c_idx)=>{
 
-               console.log("Collums =>",colums ,"And =>",data[colums])
-              const match = String(data[colums]).includes(complain.search);
-              console.log("Matched =>",match)
-              if(match){
-                matchdata.push(complaindata[c_idx]) 
-                break;
-              }
-            }
+          //   for(const colums of Object.keys(data)) {
 
-            console.log("Complain length", complaindata.length,"Current idx =>",c_idx);
-            if(complaindata.length-1 === c_idx){
-              if (matchdata[0]) {
-                res.json(matchdata);
-              } else {
-                res.json("Not Found Any Complain For This User.");
-              }
-            }
-          })       
+          //      console.log("Collums =>",colums ,"And =>",data[colums])
+          //     const match = String(data[colums]).includes(complain.search);
+          //     console.log("Matched =>",match)
+          //     if(match){
+          //       matchdata.push(complaindata[c_idx]) 
+          //       break;
+          //     }
+          //   }
+
+          //   console.log("Complain length", complaindata.length,"Current idx =>",c_idx);
+          //   if(complaindata.length-1 === c_idx){
+          //   }
+          // })     
+
+          if (complaindata[0]) {
+            res.json(complaindata);
+          } else {
+            res.json("Not Found Any Complain For This User.");
+          }
       }
     }else{
       res.json("Invalid Token Or Expired.")

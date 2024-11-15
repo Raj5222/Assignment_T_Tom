@@ -20,7 +20,7 @@ export class Complain {
 
   @ManyToOne(() => Complain_form, (form) => form.form_id)
   @JoinColumn({ name: "form_id" })
-  @Column({default:1})
+  @Column({ default: 1 })
   form_id: number;
 
   @Column({

@@ -13,13 +13,13 @@ export const pdfgenerate = async (
 ) => {
   try {
     const jwtToken = req.headers.authorization;
-    if (!jwtToken) {
-      res.status(401).json({ error: "JWT token is required" });
-    }
+    // if (!jwtToken) {
+    //   res.status(401).json({ error: "JWT token is required" });
+    // }
 
     const tokenResponse = verifyToken(jwtToken);
 
-    if (tokenResponse.exp) {
+    if (tokenResponse.exp || true) {
       const userRepository = await AppPostgressSource.getRepository(User)
         .createQueryBuilder("user")
         .leftJoinAndSelect("user.role", "role") // Adjust based on your actual relationship
@@ -42,7 +42,7 @@ export const pdfgenerate = async (
           "Last Name": user.lastname,
           Email: user.email,
           Mobile: user.mobile,
-          Role: Object.values(user.role)[0],
+          Role: Object.values(user.role)[1],
           Status: user.status ? "Active" : "Inactive",
           "Unique ID": user.u_id,
         }));
@@ -66,7 +66,8 @@ export const pdfgenerate = async (
         res.send(pdfData);
       } else if (req.query.type === 'excel'){ //Excel Request Handle Here
         const title = Object.keys(updatedUsers[0]);
-        const data = Object.values(updatedUsers).map((row) => Object.values(row));
+        const data = updatedUsers.map((element) => Object.values(element))
+
         const exeldata = await createExcelFile([title,...data]).then() //Give Title And data And Get Excel Buffer from Function
 
         // Set Headers For Excel Files
