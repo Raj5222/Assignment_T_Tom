@@ -4,9 +4,11 @@ import { generateToken, verifyToken } from "../Services/jwt";
 import moment from "moment";
 import { Complain } from "../entity/Complain";
 import { schedule } from "node-cron";
+import { User } from "../entity/Users";
 
 
 const userRepository = AppPostgressSource.getRepository(Complain);
+const userTableRepository = AppPostgressSource.getRepository(User);
 
 // moment(new Date().toISOString().replace("T", " ").slice(0, 16)).isSameOrBefore("2010-10-21");
 //Cron Job
@@ -54,7 +56,7 @@ export const complainCreate = async (req: Request, res: Response, error?: Errbac
         // if (!incomigdata.token)
         //     res.json({
         //       error: "Token Not Available",
-        //       token: generateToken(incomigdata.user_id),
+        //       token: await generateToken(incomigdata.user_id),
         //     }); //When Token Not Available
 
         if(!incomigdata.complain_title)res.json({error: "Title Not Available"})
@@ -73,43 +75,78 @@ export const complainCreate = async (req: Request, res: Response, error?: Errbac
 
         if(id){
 
-          // incomigdata.complain_data.map((data:any)=>{ //Check Form patterns
-          //   if(data.gender){
-          //     incomigdata.form_id = 1
-          //   }
+        const complain_prefix = await userTableRepository
+          .createQueryBuilder("user")
+          .select(["u_id"])
+          .where("user_u_id = :id", { id })
+          .execute();
 
-          //   if(data.fullname){
-          //     incomigdata.form_id = 2
-          //   }
+        const count_prefix = await userRepository
+          .createQueryBuilder()
+          .select(["complain_id"])
+          .where("complain_user_id = :id", { id })
+          .execute();
 
-          //   if(data.firstname && data.lastname){
-          //     incomigdata.form_id = 3
-          //   }
+        console.log("Prefix => ", complain_prefix[0].u_id);
+        complain_prefix[0].u_id = complain_prefix[0].u_id + "_" + (count_prefix.length+1);
 
-          //   if(data.firstname && data.lastname && data.gender){
-          //     incomigdata.form_id = 4
-          //   }
+          const form_entity = await userRepository.query(
+            `SELECT form_field_array FROM complain_from where form_id = ${incomigdata.form_id};`
+          );
+          
+          const complainData = [];
 
-          //   if(data.fullname && data.gender){
-          //     incomigdata.form_id = 5
-          //   }
+          Object.keys(incomigdata.complain_data[0]).forEach((dataKey) => {
+            const dataValue = incomigdata.complain_data[0][dataKey];
+            const complainDataObject = { [dataKey]: dataValue };
 
-          //   if(data.gender && data.mobile){
-          //     incomigdata.form_id = 6
-          //   }
+            Object.keys(form_entity[0].form_field_array).forEach(
+              (entityKey) => {
+                if (dataKey === entityKey) {
+                  complainDataObject.u_id =
+                    form_entity[0].form_field_array[entityKey];
+                }
+              }
+            );
 
-          //   if(data.fullname && data.gender && data.mobile){
-          //     incomigdata.form_id = 7
-          //   }
-          // })
+            complainData.push(complainDataObject);
+          });
 
-            const Response:any = await userRepository //Postgress
+          // Check for invalid form entities
+          const invalidEntities = Object.keys(
+            incomigdata.complain_data[0]
+          ).filter(
+            (dataKey) =>
+              !Object.keys(form_entity[0].form_field_array).includes(dataKey)
+          );
+
+          if (invalidEntities.length > 0) {
+            res.json({
+              Message: `${invalidEntities.join(
+                ", "
+              )} are Invalid Form Entities`,
+            });
+          }
+
+          console.log("JSON => ",complainData)
+          delete incomigdata.complain_data
+
+          if (invalidEntities.length === 0){
+
+            const Response: any = await userRepository //Postgress
               .createQueryBuilder()
               .insert()
               .into(Complain)
-              .values({...incomigdata,complain_user_id:id}).execute()
+              .values({
+                ...incomigdata,
+                complain_prefix: complain_prefix[0].u_id,
+                complain_data: complainData,
+                complain_user_id: id,
+              })
+              .execute();
 
               res.json({ Message:"New Complain Created"});
+          }
 
         }else{
             res.status(500).json({ error: "Invalid Or Expired JWT token" });

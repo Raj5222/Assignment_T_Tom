@@ -14,16 +14,32 @@ export const complain_form_create = async (req: Request, res: Response, error?: 
       if (!incomigdata.form_field_array) res.json({ error: "Form Field Not Available" });
       const { id } = await verifyToken(token); //Token Check
       
-      if(id){
+      if(id){        
 
-        const Response: any = await userRepository //Postgress
-          .createQueryBuilder()
-          .insert()
-          .into(Complain_form)
-          .values({ ...incomigdata, form_create_user_id: id })
-          .execute();
+        let formtitle = incomigdata.form_title;
+        let form_fields = {}
+        let next_id = await userRepository.query(
+           `SELECT MAX(form_id) + 1 AS next_id FROM complain_from;`
+         );
 
-        res.json({ Message: "New Form Created" });
+        incomigdata.form_field_array.map((data,index)=>{
+          form_fields[data] = `${formtitle.slice(0, 2)}_${next_id[0].next_id || 1}_${Math.floor(
+            10000 + Math.random() * 80000
+          )}`;
+        })
+        
+        try{         
+            const Response: any = await userRepository.createQueryBuilder()
+              .insert()
+              .into(Complain_form)
+              .values({ form_title: formtitle,form_field_array:form_fields, form_create_user_id: id })
+              .execute();
+
+              res.json({ Message: "New Form Created" });
+        }catch(err){
+          res.json({ Message: "Form Name Already Avalable" });
+          error(err)
+        }
 
 
       }else{

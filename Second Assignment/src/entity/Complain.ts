@@ -45,6 +45,9 @@ export class Complain {
   @Column()
   complain_user_id: number;
 
+  @Column()
+  complain_prefix: string;
+
   @CreateDateColumn({ type: "timestamp with time zone" })
   created_at: Date;
 }

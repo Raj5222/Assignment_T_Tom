@@ -57,7 +57,34 @@ export const complainGet = async (
         }
       }
 
-      if (complain.user && complain.search) {
+      if (complain.filter) {
+        const complaindata: any = await userRepository
+          .createQueryBuilder("complain_table")
+          .select([
+            "complain_id",
+            "complain_user_id",
+            "complain_title",
+            "complain_data",
+            "complain_status",
+            "trigger_time",
+            "form_id",
+            "created_at",
+          ])
+          .where("complain_data @>:filter", {
+            filter: JSON.stringify([{ ...complain.filter.form_fileds[0] }]),
+          })
+          .getRawMany();  
+
+          
+          if (complaindata[0]) {
+            res.json(complaindata);
+          } else {
+            res.json("Not Found Any Complain For This Filter.");
+          }
+
+      }
+
+      if (complain.search) {
         const complaindata = await userRepository
           .createQueryBuilder("complain_table")
           .select([
@@ -70,11 +97,14 @@ export const complainGet = async (
             "created_at",
           ])
           .where(
-            'complain_data::jsonb @> \'[{"firstname": :firstname}]\'',
-            { firstname: complain.search }
+            'complain_data::text ILIKE :search',
+            { search: `%${complain.search}%` }
           )
           .getRawMany();
 
+          // RAJ0001
+          // RAJ0002
+          
           // const matchdata = []
           // const x = await complaindata.map((data,c_idx)=>{
 
@@ -97,7 +127,7 @@ export const complainGet = async (
           if (complaindata[0]) {
             res.json(complaindata);
           } else {
-            res.json("Not Found Any Complain For This User.");
+            res.json("Not Found Any Complain For This Data.");
           }
       }
     }else{

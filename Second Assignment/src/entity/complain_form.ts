@@ -13,11 +13,11 @@ export class Complain_form {
   @PrimaryGeneratedColumn()
   form_id: number;
 
-  @Column()
+  @Column({unique:true})
   form_title: string;
 
   @Column({ type: "jsonb" })
-  form_field_array: string;
+  form_field_array: object;
 
   @ManyToOne(() => User, (user) => user.u_id)
   @JoinColumn({ name: "form_create_user_id" })

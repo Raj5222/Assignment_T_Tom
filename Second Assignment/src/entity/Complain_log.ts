@@ -21,6 +21,9 @@ export class ComplainLog {
   @Column()
   complain_title: string;
 
+  @Column()
+  complain_prefix: string;
+
   @ManyToOne(() => Complain_form, (form) => form.form_id)
   @JoinColumn({ name: "form_id" })
   @Column()
