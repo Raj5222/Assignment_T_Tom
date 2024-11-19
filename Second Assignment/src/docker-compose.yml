@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres
+    restart: always
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    ports:
+      - 6784:5432
+
+    environment:
+      - POSTGRES_DB=node_intern
+      - POSTGRES_USER=Raj0206
+      - POSTGRES_PASSWORD=0206
+
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
